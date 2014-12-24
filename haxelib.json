@@ -1,0 +1,11 @@
+{
+	"name":"classic-for",
+	"url":"https://github.com/player-03/classic-for",
+	"license":"MIT",
+	"tags":["macro","openfl"],
+	"dependencies":{"tink_macro":""},
+	"description":"A library that enables C-style for loops within Haxe.",
+	"version":"0.1",
+	"releasenote":"Initial release",
+	"contributors":["player_03"]
+}
