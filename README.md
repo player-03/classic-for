@@ -20,7 +20,7 @@ In build.hxml (if using pure Haxe):
 
 In Example.hx:
 
-    @macro(ClassicFor.build())
+    @:build(ClassicFor.build())
     class Example {
         public static function add1To10():Int {
             var sum:Int = 0;
