@@ -29,8 +29,7 @@ package;
 import haxe.macro.Compiler;
 import haxe.macro.Context;
 import haxe.macro.Expr;
-import tink.macro.Exprs;
-import tink.macro.Functions;
+import haxe.macro.ExprTools;
 
 class ClassicFor {
 	public static macro function build():Array<Field> {
@@ -39,22 +38,27 @@ class ClassicFor {
 		for(field in fields) {
 			switch(field.kind) {
 				case FVar(t, e):
-					field.kind = FVar(t,
-						Exprs.typedMap(e, modifyExpr, field.pos));
+					if(e != null) {
+						field.kind = FVar(t,
+							ExprTools.map(e, modifyExpr));
+					}
 				case FProp(get, set, t, e):
 					field.kind = FProp(get, set, t,
-						Exprs.typedMap(e, modifyExpr, field.pos));
+						ExprTools.map(e, modifyExpr));
 				case FFun(f):
-					field.kind = FFun(Functions.func(
-						Exprs.typedMap(f.expr, modifyExpr, field.pos),
-						f.args, f.ret, f.params, false));
+					field.kind = FFun({
+						args:f.args,
+						ret:f.ret,
+						params:f.params,
+						expr:ExprTools.map(f.expr, modifyExpr)
+					});
 			}
 		}
 		
 		return fields;
 	}
 	
-	private static function modifyExpr(expr:Expr, context:Array<VarDecl>):Expr {
+	private static function modifyExpr(expr:Expr):Expr {
 		switch(expr.expr) {
 			case EMeta(meta, block):
 				if(meta.name == "for") {
@@ -85,12 +89,13 @@ class ClassicFor {
 						increment = params.slice(i + 1);
 					}
 					
-					return makeForLoop(init, condition, increment, block);
+					return makeForLoop(init, condition, increment,
+						ExprTools.map(block, modifyExpr));
 				}
 			default:
 		}
 		
-		return expr;
+		return ExprTools.map(expr, modifyExpr);
 	}
 	
 	private static function isAssignment(expr:Expr):Bool {
