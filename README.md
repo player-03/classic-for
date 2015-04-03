@@ -6,22 +6,7 @@ A library that enables C-style `for` loops within Haxe.
 Usage
 -----
 
-Installation:
-
-    haxelib install classic-for
-
-In project.xml (if using OpenFL):
-
-    <haxelib name="classic-for" />
-
-In build.hxml (if using pure Haxe):
-
-    -lib classic-for
-
-In Example.hx:
-
-    @:build(ClassicFor.build())
-    class Example {
+    class Example implements ClassicFor {
         public static function add1To10():Int {
             var sum:Int = 0;
             
@@ -30,20 +15,6 @@ In Example.hx:
             }
             
             return sum;
-        }
-    }
-
-Alternately:
-
-    class Example implements ClassicFor {
-        public static function factorial(n:Int):Int {
-            var total:Int = 1;
-            
-            @for(n > 1, n--) {
-                total *= n;
-            }
-            
-            return total;
         }
     }
 
