@@ -38,19 +38,15 @@ class ClassicFor {
 		for(field in fields) {
 			switch(field.kind) {
 				case FVar(t, e):
-					if(e != null) {
-						field.kind = FVar(t,
-							ExprTools.map(e, modifyExpr));
-					}
+					field.kind = FVar(t, modifyExpr(e));
 				case FProp(get, set, t, e):
-					field.kind = FProp(get, set, t,
-						ExprTools.map(e, modifyExpr));
+					field.kind = FProp(get, set, t, modifyExpr(e));
 				case FFun(f):
 					field.kind = FFun({
 						args:f.args,
 						ret:f.ret,
 						params:f.params,
-						expr:ExprTools.map(f.expr, modifyExpr)
+						expr:modifyExpr(f.expr)
 					});
 			}
 		}
@@ -59,6 +55,8 @@ class ClassicFor {
 	}
 	
 	private static function modifyExpr(expr:Expr):Expr {
+		if (expr == null)
+			return null;
 		switch(expr.expr) {
 			case EMeta(meta, block):
 				if(meta.name == "for") {
