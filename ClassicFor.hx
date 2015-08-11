@@ -42,12 +42,7 @@ class ClassicFor {
 				case FProp(get, set, t, e):
 					field.kind = FProp(get, set, t, modifyExpr(e));
 				case FFun(f):
-					field.kind = FFun({
-						args:f.args,
-						ret:f.ret,
-						params:f.params,
-						expr:modifyExpr(f.expr)
-					});
+					f.expr = modifyExpr(f.expr);
 			}
 		}
 		
@@ -55,8 +50,10 @@ class ClassicFor {
 	}
 	
 	private static function modifyExpr(expr:Expr):Expr {
-		if (expr == null)
+		if(expr == null) {
 			return null;
+		}
+		
 		switch(expr.expr) {
 			case EMeta(meta, block):
 				if(meta.name == "for") {
