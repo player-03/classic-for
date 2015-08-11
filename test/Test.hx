@@ -47,11 +47,11 @@ class Test extends TestCase implements ClassicFor {
 	};
 	
 	private function testVariableField():Void {
-		assertEquals(variable, 45);
+		assertEquals(45, variable);
 	}
 	
 	private function testPropertyField():Void {
-		assertEquals(property, 55);
+		assertEquals(55, property);
 	}
 	
 	private function testAddition():Void {
@@ -61,7 +61,7 @@ class Test extends TestCase implements ClassicFor {
 			sum += i;
 		}
 		
-		assertEquals(sum, 45);
+		assertEquals(45, sum);
 	}
 	
 	private function testNoIterations():Void {
@@ -71,7 +71,7 @@ class Test extends TestCase implements ClassicFor {
 			product *= i;
 		}
 		
-		assertEquals(product, 1);
+		assertEquals(1, product);
 	}
 	
 	private function testNoInit():Void {
@@ -82,7 +82,7 @@ class Test extends TestCase implements ClassicFor {
 			product *= i;
 		}
 		
-		assertEquals(product, 24);
+		assertEquals(24, product);
 	}
 	
 	private function testNoIncrement():Void {
@@ -92,7 +92,7 @@ class Test extends TestCase implements ClassicFor {
 			product *= i;
 		}
 		
-		assertEquals(product, 16);
+		assertEquals(16, product);
 	}
 	
 	private function testFibonacci():Void {
@@ -102,7 +102,7 @@ class Test extends TestCase implements ClassicFor {
 			sum = i + j;
 		}
 		
-		assertEquals(sum, 13);
+		assertEquals(13, sum);
 	}
 	
 	private function testBreak():Void {
@@ -116,7 +116,7 @@ class Test extends TestCase implements ClassicFor {
 			sum += i;
 		}
 		
-		assertEquals(sum, 10);
+		assertEquals(10, sum);
 	}
 	
 	private function testContinue():Void {
@@ -130,7 +130,7 @@ class Test extends TestCase implements ClassicFor {
 			sum += i;
 		}
 		
-		assertEquals(sum, 40);
+		assertEquals(40, sum);
 	}
 	
 	public static function main():Void {
