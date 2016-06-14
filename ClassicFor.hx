@@ -111,9 +111,13 @@ class ClassicFor {
 			incrementExpr = macro $b{increment};
 		}
 		
-		init.push(macro if($condition)
+		init.push(macro while($condition) {
+				var shouldBreak:Bool = true;
 				do $block
-				while( {$incrementExpr; $condition;} ));
+				while(shouldBreak = false);
+				if(shouldBreak) break;
+				$incrementExpr;
+			});
 		
 		return macro $b{init};
 	}
