@@ -4,7 +4,7 @@
 	"license":"MIT",
 	"tags":["macro"],
 	"description":"A library that enables C-style for loops within Haxe.",
-	"version":"0.3.0",
+	"version":"0.3.1",
 	"releasenote":"Reduced output code size",
 	"contributors":["player_03"]
 }
