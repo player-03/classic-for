@@ -103,6 +103,8 @@ class ClassicFor {
 		}
 	}
 	
+	private static var continueFound:Bool;
+	private static var breakFound:Bool;
 	private static function makeForLoop(init:Array<Expr>, condition:Expr, increment:Array<Expr>, block:Expr):Expr {
 		var incrementExpr:Expr;
 		if(increment.length == 1) {
@@ -111,15 +113,49 @@ class ClassicFor {
 			incrementExpr = macro $b{increment};
 		}
 		
-		init.push(macro while($condition) {
-				var shouldBreak:Bool = true;
-				do $block
-				while(shouldBreak = false);
-				if(shouldBreak) break;
+		continueFound = false;
+		breakFound = false;
+		findContinueAndBreak(block);
+		
+		if(continueFound && breakFound) {
+			init.push(macro while($condition) {
+					var shouldBreak:Bool = true;
+					do $block while(shouldBreak = false);
+					if(shouldBreak) break;
+					$incrementExpr;
+				}
+			);
+		} else if(continueFound) {
+			init.push(macro while($condition) {
+				do $block while(false);
 				$incrementExpr;
 			});
+		} else {
+			var blockExprs:Array<Expr>;
+			switch(block.expr) {
+				case EBlock(array):
+					blockExprs = array;
+				default:
+					blockExprs = [block];
+			}
+			
+			blockExprs.push(incrementExpr);
+			
+			init.push(macro while($condition) $b{blockExprs});
+		}
 		
 		return macro $b{init};
+	}
+	
+	private static function findContinueAndBreak(block:Expr):Void {
+		switch(block) {
+			case macro continue:
+				continueFound = true;
+			case macro break:
+				breakFound = true;
+			default:
+				ExprTools.iter(block, findContinueAndBreak);
+		}
 	}
 }
 

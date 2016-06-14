@@ -133,6 +133,23 @@ class Test extends TestCase implements ClassicFor {
 		assertEquals(40, sum);
 	}
 	
+	private function testContinueAndBreak():Void {
+		var sum:Int = 0;
+		
+		@for(var i:Int = 1, i < 10, i++) {
+			if(i == 5) {
+				continue;
+			}
+			if(i == 8) {
+				break;
+			}
+			
+			sum += i;
+		}
+		
+		assertEquals(23, sum);
+	}
+	
 	public static function main():Void {
 		var runner = new TestRunner();
 		runner.add(new Test());
