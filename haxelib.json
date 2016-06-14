@@ -4,7 +4,7 @@
 	"license":"MIT",
 	"tags":["macro"],
 	"description":"A library that enables C-style for loops within Haxe.",
-	"version":"0.2.0",
-	"releasenote":"Removed tink_macro dependency",
+	"version":"0.3.0",
+	"releasenote":"Reduced output code size",
 	"contributors":["player_03"]
 }
