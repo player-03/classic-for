@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2015 Andy Li, Joseph Cloutier
+ * Copyright (c) 2015-2024 Andy Li, Joseph Cloutier
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,13 +24,9 @@
 
 package;
 
-import haxe.unit.*;
+import utest.*;
 
-class Test extends TestCase implements ClassicFor {
-	//Variables and properties must work even if they aren't initialized.
-	private var emptyVariable:Int;
-	private var emptyProperty(default, default):Int;
-	
+class Test extends utest.Test implements ClassicFor {
 	private var variable:Int = {
 		var sum = 0;
 		@for(var i:Int = 0, i < 10, i++) {
@@ -47,11 +43,11 @@ class Test extends TestCase implements ClassicFor {
 	};
 	
 	private function testVariableField():Void {
-		assertEquals(45, variable);
+		Assert.equals(45, variable);
 	}
 	
 	private function testPropertyField():Void {
-		assertEquals(55, property);
+		Assert.equals(55, property);
 	}
 	
 	private function testAddition():Void {
@@ -61,7 +57,7 @@ class Test extends TestCase implements ClassicFor {
 			sum += i;
 		}
 		
-		assertEquals(45, sum);
+		Assert.equals(45, sum);
 	}
 	
 	private function testNoIterations():Void {
@@ -71,7 +67,20 @@ class Test extends TestCase implements ClassicFor {
 			product *= i;
 		}
 		
-		assertEquals(1, product);
+		Assert.equals(1, product);
+	}
+	
+	private function testNoCondition():Void {
+		var product:Int = 1;
+		
+		@for(var i:Int = 4, i++) {
+			product *= i;
+			if(product > 100) {
+				break;
+			}
+		}
+		
+		Assert.equals(120, product);
 	}
 	
 	private function testNoInit():Void {
@@ -82,7 +91,7 @@ class Test extends TestCase implements ClassicFor {
 			product *= i;
 		}
 		
-		assertEquals(24, product);
+		Assert.equals(24, product);
 	}
 	
 	private function testNoIncrement():Void {
@@ -92,7 +101,7 @@ class Test extends TestCase implements ClassicFor {
 			product *= i;
 		}
 		
-		assertEquals(16, product);
+		Assert.equals(16, product);
 	}
 	
 	private function testFibonacci():Void {
@@ -102,7 +111,7 @@ class Test extends TestCase implements ClassicFor {
 			sum = i + j;
 		}
 		
-		assertEquals(13, sum);
+		Assert.equals(13, sum);
 	}
 	
 	private function testBreak():Void {
@@ -116,7 +125,7 @@ class Test extends TestCase implements ClassicFor {
 			sum += i;
 		}
 		
-		assertEquals(10, sum);
+		Assert.equals(10, sum);
 	}
 	
 	private function testContinue():Void {
@@ -130,7 +139,7 @@ class Test extends TestCase implements ClassicFor {
 			sum += i;
 		}
 		
-		assertEquals(40, sum);
+		Assert.equals(40, sum);
 	}
 	
 	private function testContinueAndBreak():Void {
@@ -147,19 +156,10 @@ class Test extends TestCase implements ClassicFor {
 			sum += i;
 		}
 		
-		assertEquals(23, sum);
+		Assert.equals(23, sum);
 	}
 	
 	public static function main():Void {
-		var runner = new TestRunner();
-		runner.add(new Test());
-		var success = runner.run();
-		if(!success) {
-			#if sys
-				Sys.exit(1);
-			#else
-				throw "failed";
-			#end
-		}
+		UTest.run([new Test()]);
 	}
 }

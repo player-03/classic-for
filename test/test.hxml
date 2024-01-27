@@ -1,3 +1,4 @@
 -main Test
 -cp ..
+-lib utest
 --interp
