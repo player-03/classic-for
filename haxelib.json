@@ -3,8 +3,8 @@
 	"url":"https://github.com/player-03/classic-for",
 	"license":"MIT",
 	"tags":["macro"],
-	"description":"A library that enables C-style for loops within Haxe.",
-	"version":"0.3.1",
-	"releasenote":"Reduced output code size",
+	"description":"A small macro to allow writing C-style `for` loops.",
+	"version":"0.4.0",
+	"releasenote":"Made output more consistent, tweaked logic.",
 	"contributors":["player_03"]
 }
