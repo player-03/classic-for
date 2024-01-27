@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  * 
- * Copyright (c) 2014 Joseph Cloutier
+ * Copyright (c) 2014-2024 Joseph Cloutier
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,136 +26,82 @@ package;
 
 #if macro
 
-import haxe.macro.Compiler;
 import haxe.macro.Context;
 import haxe.macro.Expr;
-import haxe.macro.ExprTools;
+
+using haxe.macro.ExprTools;
+using Lambda;
 
 class ClassicFor {
 	public static macro function build():Array<Field> {
-		var fields:Array<Field> = Context.getBuildFields();
+		final fields:Array<Field> = Context.getBuildFields();
 		
 		for(field in fields) {
 			switch(field.kind) {
 				case FVar(t, e):
-					field.kind = FVar(t, modifyExpr(e));
+					field.kind = FVar(t, process(e));
 				case FProp(get, set, t, e):
-					field.kind = FProp(get, set, t, modifyExpr(e));
+					field.kind = FProp(get, set, t, process(e));
 				case FFun(f):
-					f.expr = modifyExpr(f.expr);
+					f.expr = process(f.expr);
 			}
 		}
 		
 		return fields;
 	}
 	
-	private static function modifyExpr(expr:Expr):Expr {
+	private static function process(expr:Expr):Expr {
 		if(expr == null) {
 			return null;
 		}
 		
 		switch(expr.expr) {
-			case EMeta(meta, block):
-				if(meta.name == "for") {
-					var params:Array<Expr> = meta.params;
-					var init:Array<Expr>;
-					var condition:Expr;
-					var increment:Array<Expr>;
+			case EMeta({ name: "for", params: params, pos: pos }, body):
+				var init:Array<Expr>;
+				var condition:Expr;
+				var increment:Array<Expr>;
+				
+				if(params.length == 3) {
+					init = [params[0]];
+					condition = params[1];
+					increment = [params[2]];
+				} else {
+					var i:Int = params.findIndex(param -> param.expr.match(
+						EBinop(OpEq | OpNotEq | OpGt | OpGte | OpLt | OpLte
+							| OpBoolAnd | OpBoolOr | OpIn, _, _)
+						| EUnop(OpNot, _, _) | EConst(_) | ECall(_, _)
+						| EField(_, _) | EArray(_, _) | ETernary(_, _, _)
+					));
 					
-					if(params.length == 3) {
-						init = [params[0]];
-						condition = params[1];
-						increment = [params[2]];
+					if(i >= 0) {
+						init = params.slice(0, i);
+						condition = params[i];
+						increment = params.slice(i + 1);
 					} else {
-						var i:Int = 0;
-						while(i < params.length && isAssignment(params[i])) {
-							i++;
+						i = params.findIndex(param -> !param.expr.match(EVars(_) | EBinop(OpAssign, _, _)));
+						if(i < 0) {
+							i = params.length;
 						}
 						
 						init = params.slice(0, i);
-						
-						if(i < params.length) {
-							condition = params[i];
-						} else {
-							//No valid condition was provided; default to true.
-							condition = macro true;
-						}
-						
-						increment = params.slice(i + 1);
+						condition = macro true;
+						increment = params.slice(i);
 					}
-					
-					return makeForLoop(init, condition, increment,
-						ExprTools.map(block, modifyExpr));
 				}
+				
+				increment.push(condition);
+				
+				final result:Array<Expr> = init;
+				result.push(macro @:pos(pos) if($condition) {
+					do
+						${ body.map(process) }
+					while($b{ increment });
+				});
+				return macro $b{ result };
 			default:
 		}
 		
-		return ExprTools.map(expr, modifyExpr);
-	}
-	
-	private static function isAssignment(expr:Expr):Bool {
-		switch(expr.expr) {
-			case EVars(_) | EBinop(OpAssign, _, _) | EBinop(OpAssignOp(_), _, _)
-				| EUnop(OpDecrement, _, _) | EUnop(OpIncrement, _, _):
-				return true;
-			default:
-				return false;
-		}
-	}
-	
-	private static var continueFound:Bool;
-	private static var breakFound:Bool;
-	private static function makeForLoop(init:Array<Expr>, condition:Expr, increment:Array<Expr>, block:Expr):Expr {
-		var incrementExpr:Expr;
-		if(increment.length == 1) {
-			incrementExpr = increment[0];
-		} else {
-			incrementExpr = macro $b{increment};
-		}
-		
-		continueFound = false;
-		breakFound = false;
-		findContinueAndBreak(block);
-		
-		if(continueFound && breakFound) {
-			init.push(macro while($condition) {
-					var shouldBreak:Bool = true;
-					do $block while(shouldBreak = false);
-					if(shouldBreak) break;
-					$incrementExpr;
-				}
-			);
-		} else if(continueFound) {
-			init.push(macro while($condition) {
-				do $block while(false);
-				$incrementExpr;
-			});
-		} else {
-			var blockExprs:Array<Expr>;
-			switch(block.expr) {
-				case EBlock(array):
-					blockExprs = array;
-				default:
-					blockExprs = [block];
-			}
-			
-			blockExprs.push(incrementExpr);
-			
-			init.push(macro while($condition) $b{blockExprs});
-		}
-		
-		return macro $b{init};
-	}
-	
-	private static function findContinueAndBreak(block:Expr):Void {
-		switch(block) {
-			case macro continue:
-				continueFound = true;
-			case macro break:
-				breakFound = true;
-			default:
-				ExprTools.iter(block, findContinueAndBreak);
-		}
+		return expr.map(process);
 	}
 }
 
